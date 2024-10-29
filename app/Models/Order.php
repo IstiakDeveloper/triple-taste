@@ -48,11 +48,6 @@ class Order extends Model
         return $this->belongsTo(Branch::class);
     }
 
-    public function items()
-    {
-        return $this->hasMany(OrderItem::class);
-    }
-
     public function review()
     {
         return $this->hasOne(Review::class);
@@ -70,6 +65,12 @@ class Order extends Model
     public function getTotalItemsAttribute()
     {
         return $this->items->sum('quantity'); // Use items instead of orderItems
+    }
+
+
+        public function items()
+    {
+        return $this->hasMany(OrderItem::class);
     }
 
 }

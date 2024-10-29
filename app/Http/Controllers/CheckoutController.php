@@ -33,12 +33,13 @@ class CheckoutController extends Controller
             'addresses' => auth()->user()->addresses()->latest()->get(),
             'branch' => $branch,
             'previous_orders' => auth()->user()->orders()
-                ->with('orderItems.food')
+                ->with('items.food') // Change orderItems to items
                 ->latest()
                 ->take(5)
                 ->get(),
         ]);
     }
+
 
     public function store(Request $request)
     {
