@@ -42,6 +42,7 @@ class Order extends Model
         return $this->belongsTo(User::class);
     }
 
+
     public function branch()
     {
         return $this->belongsTo(Branch::class);
@@ -61,4 +62,14 @@ class Order extends Model
     {
         return $query->where('status', $status);
     }
+    public function scopeWithOrderDetails($query)
+    {
+        return $query->with(['items.food', 'items.extras', 'branch', 'user']); // Use 'items' instead of 'orderItems'
+    }
+
+    public function getTotalItemsAttribute()
+    {
+        return $this->items->sum('quantity'); // Use items instead of orderItems
+    }
+
 }

@@ -19,6 +19,11 @@
         "vue": "^3.4.0"
     },
     "dependencies": {
-        "aos": "^2.3.4"
+        "@googlemaps/js-api-loader": "^1.16.8",
+        "@headlessui/vue": "^1.7.23",
+        "@heroicons/vue": "^2.1.5",
+        "aos": "^2.3.4",
+        "uuid": "^11.0.2",
+        "vuedraggable": "^2.24.3"
     }
 }

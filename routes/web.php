@@ -3,6 +3,10 @@
 use App\Http\Controllers\Admin\BranchController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\FoodController;
+use App\Http\Controllers\BranchSelectionController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\CustomerOrderController;
+use App\Http\Controllers\FoodMenuController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -35,6 +39,35 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
         Route::resource('branches', BranchController::class);
         Route::resource('foods', FoodController::class);
 
+});
+
+Route::middleware(['web'])->group(function () {
+    Route::get('/locations', [BranchSelectionController::class, 'index'])
+        ->name('customer.locations');
+
+        Route::get('/branch/{branch}/menu', [FoodMenuController::class, 'index'])
+        ->name('customer.branch.menu');
+});
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/checkout/{branch}', [CheckoutController::class, 'checkout'])
+        ->name('customer.checkout');
+    Route::post('/orders', [CheckoutController::class, 'store'])->name('customer.orders.store');
+    Route::post('/addresses', [CheckoutController::class, 'storeAddress'])
+    ->name('customer.addresses.store');
+    Route::put('/addresses/{address}', [CheckoutController::class, 'updateAddress'])
+        ->name('customer.addresses.update');
+    Route::delete('/addresses/{address}', [CheckoutController::class, 'deleteAddress'])
+        ->name('customer.addresses.delete');
+    Route::post('/addresses/{address}/default', [CheckoutController::class, 'setDefaultAddress'])
+        ->name('customer.addresses.setDefault');
+
+
+    Route::prefix('customer')->name('customer.')->group(function () {
+        Route::get('/orders', [CustomerOrderController::class, 'index'])->name('orders.index');
+        Route::get('/orders/{order}', [CustomerOrderController::class, 'show'])->name('orders.show');
+    });
 });
 
 require __DIR__.'/auth.php';

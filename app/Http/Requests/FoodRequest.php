@@ -27,13 +27,20 @@ class FoodRequest extends FormRequest
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'base_price' => 'required|numeric|min:0',
-            'preparation_time' => 'nullable|integer|min:0',
-            'image_path' => 'nullable|string|max:255',
+            'preparation_time' => 'required|integer|min:1',
+            'image' => $this->isMethod('POST') ? 'required|image|max:2048' : 'nullable|image|max:2048',
             'is_vegetarian' => 'boolean',
             'is_spicy' => 'boolean',
             'allergens' => 'nullable|array',
+            'allergens.*' => 'string',
             'is_available' => 'boolean',
-            'sort_order' => 'integer|min:0'
+            'sort_order' => 'integer|min:0',
+            'extra_options' => 'array',
+            'extra_options.*.id' => 'nullable|exists:extra_options,id',
+            'extra_options.*.name' => 'required|string|max:255',
+            'extra_options.*.price' => 'required|numeric|min:0',
+            'extra_options.*.is_available' => 'boolean',
+            'extra_options.*.sort_order' => 'integer|min:0'
         ];
     }
 }
