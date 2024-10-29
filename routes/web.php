@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\BranchController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\FoodController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -22,6 +25,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('categories', CategoryController::class);
+    Route::post('categories/update-order', [CategoryController::class, 'updateOrder'])
+        ->name('categories.update-order');
+        Route::resource('branches', BranchController::class);
+        Route::resource('foods', FoodController::class);
+
 });
 
 require __DIR__.'/auth.php';

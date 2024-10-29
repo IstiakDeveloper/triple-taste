@@ -19,9 +19,12 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
-        'photo',  
+        'photo',
         'email',
         'password',
+        'phone',
+        'default_address',
+        'role',
     ];
 
     /**
@@ -44,6 +47,42 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
+
         ];
+    }
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function addresses()
+    {
+        return $this->hasMany(UserAddress::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
+    public function favoriteFoods()
+    {
+        return $this->belongsToMany(Food::class, 'favorites');
+    }
+
+    public function isAdmin()
+    {
+        return $this->role === 'super_admin';
+    }
+
+    public function isBranchAdmin()
+    {
+        return $this->role === 'branch_admin';
     }
 }

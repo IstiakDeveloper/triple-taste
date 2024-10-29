@@ -238,6 +238,8 @@
 import { ref, onMounted } from 'vue';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+import { switchTheme } from '@/theme';
+
 
 const features = ref([
   { icon: 'fas fa-utensils', title: 'Quality Ingredients', desc: 'We source the freshest ingredients for every dish.' },
@@ -280,9 +282,6 @@ const closeModal = () => {
   showModal.value = false;
 };
 
-const switchTheme = () => {
-  document.body.classList.toggle('dark');
-};
 
 onMounted(() => {
   AOS.init({ duration: 1000 });
