@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
 use Inertia\Middleware;
+use App\Models\Branch;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -39,6 +40,11 @@ class HandleInertiaRequests extends Middleware
                     ? $request->user()->only('id', 'name', 'email', 'role')
                     : null,
             ],
+            'selectedBranch' => function () use ($request) {
+                // Assuming you have a branch ID stored in the session
+                $branchId = $request->session()->get('selectedBranch');
+                return $branchId ? Branch::find($branchId) : null;
+            },
         ]);
     }
 }

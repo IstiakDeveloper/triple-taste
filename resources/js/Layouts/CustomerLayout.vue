@@ -1,136 +1,284 @@
 <template>
-    <div class="min-h-screen dark:bg-gray-900">
-        <!-- Hero Section -->
-        <div class="relative min-h-screen">
-            <div class="absolute inset-0 bg-black/50 dark:bg-black/90" :style="{
-                backgroundImage: `url('/food1.jpg')`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-            }">
-                <div class="absolute inset-0 bg-black opacity-70"></div>
+    <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <!-- Header -->
+      <header class="bg-white dark:bg-gray-800 shadow-sm">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex justify-between h-16">
+            <!-- Logo and Main Nav -->
+            <div class="flex">
+              <div class="flex-shrink-0 flex items-center">
+                <Link :href="route('home')">
+                  <ApplicationLogo class="block h-8 w-auto" />
+                </Link>
+              </div>
+
+              <!-- Main Navigation -->
+              <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                <Link
+                  :href="route('customer.locations')"
+                  class="inline-flex items-center px-1 pt-1 border-b-2"
+                  :class="[
+                    route().current('customer.locations')
+                      ? 'border-indigo-500 text-gray-900 dark:text-gray-100'
+                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                  ]"
+                >
+                  Locations
+                </Link>
+
+                <Link
+                  v-if="selectedBranch"
+                  :href="route('customer.menu', { branch: selectedBranch.id })"
+                  class="inline-flex items-center px-1 pt-1 border-b-2"
+                  :class="[
+                    route().current('customer.menu')
+                      ? 'border-indigo-500 text-gray-900 dark:text-gray-100'
+                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                  ]"
+                >
+                  Menu
+                </Link>
+
+                <Link
+                  :href="route('customer.orders.index')"
+                  class="inline-flex items-center px-1 pt-1 border-b-2"
+                  :class="[
+                    route().current('customer.orders.index')
+                      ? 'border-indigo-500 text-gray-900 dark:text-gray-100'
+                      : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                  ]"
+                >
+                  Orders
+                </Link>
+              </div>
             </div>
 
-            <div class="relative z-10">
-                <!-- Navigation -->
-                <nav class="container mx-auto px-6 py-8">
-                    <div class="flex items-center justify-between">
-                        <h1 class="text-3xl font-bold text-white dark:text-gray-100">Triple-Taste</h1>
-                        <div class="flex items-center gap-4">
-                            <div class="hidden md:flex space-x-8 text-white dark:text-gray-300 ml-4">
-                                <a href="#about"
-                                    class="hover:text-orange-400 transition-colors dark:hover:text-orange-300">About</a>
-                                <a href="#features"
-                                    class="hover:text-orange-400 transition-colors dark:hover:text-orange-300">Features</a>
-                                <a href="#contact"
-                                    class="hover:text-orange-400 transition-colors dark:hover:text-orange-300">Contact</a>
-                            </div>
-                            <div class="fixed top-4 right-4 z-50">
-                                <button @click="switchTheme"
-                                    class="text-orange-400 dark:text-gray-300 transition-colors hover:text-orange-400 dark:hover:text-orange-300 p-2 rounded-full focus:outline-none">
-                                    <i class="fa-solid fa-circle-half-stroke text-lg"></i>
-                                </button>
-                            </div>
+            <!-- Right Side Nav -->
+            <div class="flex items-center">
+              <!-- Shopping Cart -->
+              <button
+                @click="openCart"
+                class="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 relative"
+              >
+                <i class="fas fa-shopping-cart text-xl"></i>
+                <span
+                  v-if="cartItemsCount > 0"
+                  class="absolute -top-1 -right-1 bg-indigo-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center"
+                >
+                  {{ cartItemsCount }}
+                </span>
+              </button>
 
-                        </div>
-                    </div>
-                </nav>
+              <!-- User Menu -->
+              <div class="ml-3 relative">
+                <Dropdown align="right" width="48">
+                  <template #trigger>
+                    <button
+                      class="flex items-center text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 focus:outline-none transition duration-150 ease-in-out"
+                    >
+                      <span>{{ $page.props.auth.user.name }}</span>
+                      <i class="fas fa-chevron-down ml-2"></i>
+                    </button>
+                  </template>
 
-                <main class="flex-1 p-6 mt-16 overflow-auto">
-                    <div class="mx-auto">
-                        <slot></slot>
-                    </div>
-                </main>
-</div>
-</div>
+                  <template #content>
+                    <DropdownLink :href="route('profile.edit')">
+                      Profile
+                    </DropdownLink>
+                    <DropdownLink>
+                      Addresses
+                    </DropdownLink>
+                    <DropdownLink :href="route('customer.orders.index')">
+                      Orders
+                    </DropdownLink>
+                    <div class="border-t border-gray-200 dark:border-gray-600"></div>
+                    <form @submit.prevent="logout">
+                      <DropdownLink as="button">
+                        Log Out
+                      </DropdownLink>
+                    </form>
+                  </template>
+                </Dropdown>
+              </div>
+            </div>
+          </div>
+        </nav>
+      </header>
+
+      <!-- Selected Branch Bar (if a branch is selected) -->
+      <div
+        v-if="selectedBranch"
+        class="bg-indigo-600 text-white"
+      >
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <i class="fas fa-store"></i>
+              <span>{{ selectedBranch.name }}</span>
+              <span class="text-indigo-200">|</span>
+              <span class="text-sm text-indigo-200">
+                {{ selectedBranch.address }}
+              </span>
+            </div>
+            <Link
+              :href="route('customer.locations')"
+              class="text-sm text-indigo-200 hover:text-white"
+            >
+              Change Branch
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <main>
+        <div class="py-6">
+          <slot />
+        </div>
+      </main>
+
+      <!-- Footer -->
+      <footer class="bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <!-- Company Info -->
+            <div class="col-span-2 md:col-span-1">
+              <ApplicationLogo class="h-8 w-auto mb-4" />
+              <p class="text-sm text-gray-500 dark:text-gray-400">
+                Delicious food delivered to your doorstep
+              </p>
             </div>
 
-            <!-- Footer Section -->
-            <footer class="py-12 bg-gray-900 text-white dark:bg-gray-800">
-                <div class="container mx-auto px-6 text-center">
-                    <p class="text-sm mb-4 dark:text-gray-400">
-                        &copy; {{ new Date().getFullYear() }} Triple-Taste. All rights reserved.
-                    </p>
-                    <div class="flex justify-center space-x-6">
-                        <a href="#about"
-                            class="hover:text-orange-400 transition-colors dark:hover:text-orange-300">About Us</a>
-                        <a href="#features"
-                            class="hover:text-orange-400 transition-colors dark:hover:text-orange-300">Features</a>
-                        <a href="#contact"
-                            class="hover:text-orange-400 transition-colors dark:hover:text-orange-300">Contact</a>
-                    </div>
-                    <div class="mt-4">
-                        <a href="https://www.facebook.com" target="_blank"
-                            class="text-orange-400 hover:text-orange-300">
-                            <i class="fab fa-facebook"></i>
-                        </a>
-                        <a href="https://www.twitter.com" target="_blank"
-                            class="text-orange-400 hover:text-orange-300 mx-4">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="https://www.instagram.com" target="_blank"
-                            class="text-orange-400 hover:text-orange-300">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                    </div>
-                </div>
-            </footer>
+            <!-- Quick Links -->
+            <div>
+              <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-wider uppercase">
+                Quick Links
+              </h3>
+              <ul class="mt-4 space-y-4">
+                <li>
+                  <Link :href="route('customer.locations')"
+                    class="text-base text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                  >
+                    Locations
+                  </Link>
+                </li>
+                <li>
+                  <Link :href="route('customer.orders.index')"
+                    class="text-base text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
+                  >
+                    Orders
+                  </Link>
+                </li>
+              </ul>
+            </div>
 
-</template>
+            <!-- Contact -->
+            <div>
+              <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-wider uppercase">
+                Contact Us
+              </h3>
+              <ul class="mt-4 space-y-4">
+                <li class="text-base text-gray-500 dark:text-gray-400">
+                  <i class="fas fa-phone mr-2"></i>
+                  +1 234 567 890
+                </li>
+                <li class="text-base text-gray-500 dark:text-gray-400">
+                  <i class="fas fa-envelope mr-2"></i>
+                  support@example.com
+                </li>
+              </ul>
+            </div>
 
-<script setup>
-import { ref, onMounted } from 'vue';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
-import { switchTheme } from '@/theme';
+            <!-- Social Links -->
+            <div>
+              <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 tracking-wider uppercase">
+                Follow Us
+              </h3>
+              <div class="mt-4 flex space-x-6">
+                <a href="#" class="text-gray-400 hover:text-gray-500">
+                  <i class="fab fa-facebook text-xl"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-gray-500">
+                  <i class="fab fa-twitter text-xl"></i>
+                </a>
+                <a href="#" class="text-gray-400 hover:text-gray-500">
+                  <i class="fab fa-instagram text-xl"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-8 border-t border-gray-200 dark:border-gray-700 pt-8">
+            <p class="text-base text-gray-400 text-center">
+              © {{ new Date().getFullYear() }} Your Company. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </footer>
+
+      <!-- Cart Sidebar -->
+      <CartSidebar
+        v-if="showCart"
+        :show="showCart"
+        @close="closeCart"
+      />
+    </div>
+  </template>
+
+  <script setup>
+  import { ref, computed } from 'vue'
+  import { Link, usePage } from '@inertiajs/vue3'
+  import { useCart } from '@/Composables/useCart'
+  import ApplicationLogo from '@/Components/ApplicationLogo.vue'
+  import Dropdown from '@/Components/Dropdown.vue'
+  import DropdownLink from '@/Components/DropdownLink.vue'
+  import CartSidebar from '@/Components/CartSidebar.vue'
 
 
-const features = ref([
-    { icon: 'fas fa-utensils', title: 'Quality Ingredients', desc: 'We source the freshest ingredients for every dish.' },
-    { icon: 'fas fa-clock', title: 'Fast Delivery', desc: 'Get your favorite meals delivered quickly and safely.' },
-    { icon: 'fas fa-headset', title: '24/7 Support', desc: 'Our customer support is here to help you anytime.' },
-]);
+  const showCart = ref(false)
+  const { cartItems, cartItemsCount } = useCart()
 
-const steps = ref([
-    { number: '1', title: 'Order', desc: 'Choose your favorite meals from our menu.' },
-    { number: '2', title: 'Prepare', desc: 'Our chefs prepare your order with care.' },
-    { number: '3', title: 'Deliver', desc: 'We deliver your food hot and fresh to your door.' },
-]);
-
-const statistics = ref([
-    { number: '1000+', label: 'Happy Customers' },
-    { number: '500+', label: 'Delivered Meals' },
-    { number: '50+', label: 'Restaurants Partnered' },
-    { number: '24/7', label: 'Support Hours' },
-]);
-
-const contactInfo = ref([
-    { icon: 'fas fa-phone-alt', text: 'Call us: (123) 456-7890' },
-    { icon: 'fas fa-envelope', text: 'Email: info@tripletaste.com' },
-    { icon: 'fas fa-map-marker-alt', text: 'Address: 123 Food St, Gourmet City' },
-]);
-
-const form = ref({ name: '', email: '', message: '' });
-const showModal = ref(false);
-
-const startOrder = () => {
-    showModal.value = true;
-};
-
-const submitForm = () => {
-    alert(`Message sent: ${form.value.message}`);
-    form.value = { name: '', email: '', message: '' }; // Reset form
-};
-
-const closeModal = () => {
-    showModal.value = false;
-};
+  const { selectedBranch } = usePage().props
 
 
-onMounted(() => {
-    AOS.init({ duration: 1000 });
-});
-</script>
+  const openCart = () => {
+    showCart.value = true
+  }
 
-<style>
-/* Add any additional styles here */
-</style>
+  const closeCart = () => {
+    showCart.value = false
+  }
+
+  const logout = () => {
+    router.post(route('logout'))
+  }
+  </script>
+
+  <style scoped>
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: opacity 0.3s;
+  }
+
+  .fade-enter-from,
+  .fade-leave-to {
+    opacity: 0;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-100 dark:bg-gray-800;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-400 dark:bg-gray-600 rounded;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-500 dark:bg-gray-500;
+  }
+  </style>
