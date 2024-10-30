@@ -14,31 +14,25 @@ use Inertia\Inertia;
 
 class FoodController extends Controller
 {
-    public function index()
+    public function index(Request $request, Branch $branch)
     {
-        $foods = Food::with(['category', 'branch', 'extraOptions'])
-            ->withCount('extraOptions')
-            ->orderBy('name')
-            ->paginate(10);
+        $foods = Food::with(['category', 'extraOptions'])
+            ->where('branch_id', $branch->id)
+            ->where('is_available', true)
+            ->orderBy('sort_order')
+            ->get()
+            ->groupBy('category_id');
 
-        return Inertia::render('Admin/Foods/Index', [
-            'foods' => [
-                'data' => $foods->items(),
-                'meta' => [
-                    'current_page' => $foods->currentPage(),
-                    'from' => $foods->firstItem(),
-                    'last_page' => $foods->lastPage(),
-                    'links' => $foods->linkCollection()->toArray(),
-                    'path' => $foods->path(),
-                    'per_page' => $foods->perPage(),
-                    'to' => $foods->lastItem(),
-                    'total' => $foods->total(),
-                ],
-            ],
-            'flash' => [
-                'success' => session('success'),
-                'error' => session('error')
-            ],
+        $categories = Category::whereHas('foods', function($query) use ($branch) {
+            $query->where('branch_id', $branch->id)
+                  ->where('is_available', true);
+        })->get();
+
+        return Inertia::render('Customer/FoodMenu', [
+            'branch' => $branch,
+            'categories' => $categories,
+            'foods' => $foods,
+            'orderType' => $request->query('type', 'collection')
         ]);
     }
 

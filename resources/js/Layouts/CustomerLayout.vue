@@ -57,17 +57,17 @@
             <div class="flex items-center">
               <!-- Shopping Cart -->
               <button
-                @click="openCart"
-                class="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 relative"
-              >
+                @click="toggleCart"
+                class="relative p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            >
                 <i class="fas fa-shopping-cart text-xl"></i>
                 <span
-                  v-if="cartItemsCount > 0"
-                  class="absolute -top-1 -right-1 bg-indigo-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center"
+                v-show="itemCount > 0"
+                class="absolute -top-1 -right-1 flex items-center justify-center h-5 w-5 text-xs font-bold text-white bg-indigo-600 rounded-full"
                 >
-                  {{ cartItemsCount }}
+                {{ itemCount }}
                 </span>
-              </button>
+            </button>
 
               <!-- User Menu -->
               <div class="ml-3 relative">
@@ -218,10 +218,9 @@
 
       <!-- Cart Sidebar -->
       <CartSidebar
-        v-if="showCart"
         :show="showCart"
-        @close="closeCart"
-      />
+        @close="showCart = false"
+    />
     </div>
   </template>
 
@@ -236,7 +235,11 @@
 
 
   const showCart = ref(false)
-  const { cartItems, cartItemsCount } = useCart()
+  const { itemCount } = useCart()
+
+  const toggleCart = () => {
+    showCart.value = !showCart.value
+    }
 
   const { selectedBranch } = usePage().props
 

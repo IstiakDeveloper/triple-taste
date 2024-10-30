@@ -364,9 +364,42 @@ const props = defineProps({
         default: 'collection'
     }
 })
+const cart = useCart();
+const { addToCart: addItemToCart } = cart;
 
-// Cart handling
-const { addToCart } = useCart()
+
+const addToCart = () => {
+    if (!selectedFood.value) return;
+
+    const foodData = {
+        id: selectedFood.value.id,
+        name: selectedFood.value.name,
+        description: selectedFood.value.description,
+        base_price: selectedFood.value.base_price,
+        image_path: selectedFood.value.image_path,
+        selectedExtras: selectedExtras.value,
+        quantity: quantity.value,
+        special_instructions: specialInstructions.value
+    };
+
+    addItemToCart({
+        food: {
+            id: selectedFood.value.id,
+            name: selectedFood.value.name,
+            description: selectedFood.value.description,
+            base_price: parseFloat(selectedFood.value.base_price),
+            image_path: selectedFood.value.image_path
+        },
+        extras: selectedExtras.value,
+        quantity: quantity.value,
+        special_instructions: specialInstructions.value
+    });
+
+    closeFoodModal();
+
+    // Optional: Show success message
+    toast.success('Added to cart successfully!');
+};
 
 // State management
 const selectedFood = ref(null)
@@ -383,6 +416,10 @@ const observerOptions = {
     rootMargin: '-20% 0px -80% 0px', // Adjust based on desired visibility
     threshold: 0
 }
+
+const hasFoods = computed(() => {
+  return Object.values(props.foods).some(foods => foods && foods.length > 0);
+});
 
 // Computed properties
 const isOpen = computed(() => {

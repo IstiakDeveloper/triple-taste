@@ -1,151 +1,138 @@
-import { ref, computed } from 'vue'
+// resources/js/Composables/useCart.js
 
-// Initialize with an empty array
-const cartItems = ref([])
-const TAX_RATE = 0.1
-const BASE_DELIVERY_FEE = 5.00
+import { ref, computed } from 'vue';
+
+const cartItems = ref([]);
+const TAX_RATE = 0.1;
+const BASE_DELIVERY_FEE = 5.00;
 
 export function useCart() {
-    // Load cart from localStorage on initialization
-    const initializeCart = () => {
+    // Initialize cart
+    const initCart = () => {
         try {
-            const saved = localStorage.getItem('cart')
-            if (saved) {
-                cartItems.value = JSON.parse(saved) || []
-            }
+            const savedCart = localStorage.getItem('cart');
+            cartItems.value = savedCart ? JSON.parse(savedCart) : [];
         } catch (error) {
-            console.error('Error loading cart:', error)
-            cartItems.value = []
+            console.error('Error loading cart:', error);
+            cartItems.value = [];
         }
-    }
-
-    // Initialize cart when the composable is first used
-    initializeCart()
+    };
 
     // Save cart to localStorage
     const saveCart = () => {
         try {
-            localStorage.setItem('cart', JSON.stringify(cartItems.value))
+            localStorage.setItem('cart', JSON.stringify(cartItems.value));
         } catch (error) {
-            console.error('Error saving cart:', error)
+            console.error('Error saving cart:', error);
         }
-    }
+    };
 
     // Add item to cart
-    const addToCart = (food, extras = [], specialInstructions = '') => {
-        if (!Array.isArray(cartItems.value)) {
-            cartItems.value = []
-        }
+    const addToCart = (food) => {
+        // Create cart item with all necessary data
+        const cartItem = {
+            id: `${food.id}-${Date.now()}`, // Unique ID for cart item
+            food: {
+                id: food.id,
+                name: food.name,
+                base_price: parseFloat(food.base_price),
+                image_path: food.image_path,
+                description: food.description
+            },
+            extras: food.selectedExtras?.map(extra => ({
+                id: extra.id,
+                name: extra.name,
+                price: parseFloat(extra.price)
+            })) || [],
+            quantity: food.quantity || 1,
+            special_instructions: food.special_instructions || '',
+            unit_price: parseFloat(food.base_price),
+            total_price: calculateItemTotal({
+                unit_price: parseFloat(food.base_price),
+                quantity: food.quantity || 1,
+                extras: food.selectedExtras || []
+            })
+        };
 
-        const existingItemIndex = cartItems.value.findIndex(item => {
-            if (!item || !item.food) return false
-            const sameFood = item.food.id === food.id
-            const sameExtras = JSON.stringify(item.extras) === JSON.stringify(extras)
-            const sameInstructions = item.special_instructions === specialInstructions
-            return sameFood && sameExtras && sameInstructions
-        })
+        // Check if similar item exists
+        const existingItemIndex = cartItems.value.findIndex(item =>
+            item.food.id === food.id &&
+            JSON.stringify(item.extras) === JSON.stringify(cartItem.extras) &&
+            item.special_instructions === cartItem.special_instructions
+        );
 
         if (existingItemIndex > -1) {
-            cartItems.value[existingItemIndex].quantity++
+            // Update quantity of existing item
+            cartItems.value[existingItemIndex].quantity += cartItem.quantity;
+            cartItems.value[existingItemIndex].total_price = calculateItemTotal(cartItems.value[existingItemIndex]);
         } else {
-            cartItems.value.push({
-                id: Date.now(),
-                food,
-                extras,
-                quantity: 1,
-                unit_price: calculateItemPrice(food, extras),
-                special_instructions: specialInstructions
-            })
+            // Add new item
+            cartItems.value.push(cartItem);
         }
 
-        saveCart()
-    }
+        saveCart();
+    };
 
-    // Calculate price for a single item including extras
-    const calculateItemPrice = (food, extras) => {
-        const basePrice = parseFloat(food.base_price) || 0
-        const extrasTotal = extras.reduce((sum, extra) => {
-            return sum + (parseFloat(extra.price) || 0)
-        }, 0)
-        return basePrice + extrasTotal
-    }
+    // Calculate total for a single item including extras
+    const calculateItemTotal = (item) => {
+        const baseTotal = item.unit_price * item.quantity;
+        const extrasTotal = item.extras.reduce((sum, extra) =>
+            sum + (parseFloat(extra.price) * item.quantity), 0
+        );
+        return baseTotal + extrasTotal;
+    };
+
+    // Update item quantity
+    const updateQuantity = (itemId, newQuantity) => {
+        const item = cartItems.value.find(item => item.id === itemId);
+        if (item && newQuantity > 0) {
+            item.quantity = newQuantity;
+            item.total_price = calculateItemTotal(item);
+            saveCart();
+        }
+    };
 
     // Remove item from cart
-    const removeItem = (item) => {
-        if (!Array.isArray(cartItems.value)) return
-        cartItems.value = cartItems.value.filter(i => i.id !== item.id)
-        saveCart()
-    }
+    const removeItem = (itemId) => {
+        cartItems.value = cartItems.value.filter(item => item.id !== itemId);
+        saveCart();
+    };
 
-    // Increase item quantity
-    const increaseQuantity = (item) => {
-        if (!Array.isArray(cartItems.value)) return
-        const index = cartItems.value.findIndex(i => i.id === item.id)
-        if (index > -1) {
-            cartItems.value[index].quantity++
-            saveCart()
-        }
-    }
-
-    // Decrease item quantity
-    const decreaseQuantity = (item) => {
-        if (!Array.isArray(cartItems.value)) return
-        const index = cartItems.value.findIndex(i => i.id === item.id)
-        if (index > -1) {
-            if (cartItems.value[index].quantity > 1) {
-                cartItems.value[index].quantity--
-            } else {
-                removeItem(item)
-            }
-            saveCart()
-        }
-    }
-
-    // Clear cart
+    // Clear entire cart
     const clearCart = () => {
-        cartItems.value = []
-        saveCart()
-    }
+        cartItems.value = [];
+        localStorage.removeItem('cart');
+    };
 
-    // Computed properties with error handling
+    // Computed properties
     const cartItemsCount = computed(() => {
-        if (!Array.isArray(cartItems.value)) return 0
-        return cartItems.value.reduce((sum, item) => sum + (item?.quantity || 0), 0)
-    })
+        return cartItems.value.reduce((sum, item) => sum + item.quantity, 0);
+    });
 
     const subtotal = computed(() => {
-        if (!Array.isArray(cartItems.value)) return 0
-        return cartItems.value.reduce((sum, item) => {
-            if (!item) return sum
-            const quantity = item.quantity || 0
-            const price = parseFloat(item.unit_price) || 0
-            return sum + (quantity * price)
-        }, 0)
-    })
+        return cartItems.value.reduce((sum, item) => sum + item.total_price, 0);
+    });
 
-    const tax = computed(() => {
-        return subtotal.value * TAX_RATE
-    })
+    const tax = computed(() => subtotal.value * TAX_RATE);
 
-    const deliveryFee = computed(() => {
-        return cartItems.value.length > 0 ? BASE_DELIVERY_FEE : 0
-    })
+    const deliveryFee = computed(() => cartItems.value.length ? BASE_DELIVERY_FEE : 0);
 
-    const total = computed(() => {
-        return subtotal.value + tax.value + deliveryFee.value
-    })
+    const total = computed(() => subtotal.value + tax.value + deliveryFee.value);
+
+    // Initialize cart when composable is created
+    initCart();
 
     return {
         cartItems,
         cartItemsCount,
-        addToCart,
-        removeItem,
-        increaseQuantity,
-        decreaseQuantity,
-        clearCart,
         subtotal,
         tax,
         deliveryFee,
-        total
-    }
+        total,
+        addToCart,
+        updateQuantity,
+        removeItem,
+        clearCart,
+        calculateItemTotal
+    };
 }
