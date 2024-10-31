@@ -33,7 +33,17 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // Get the intended URL from the session
+        $redirectTo = session()->get('redirect_after_auth');
+
+        if ($redirectTo) {
+            // Clear the redirect path from session
+            session()->forget('redirect_after_auth');
+            return redirect()->intended($redirectTo);
+        }
+
+        // Default redirect to dashboard if no intended URL
+        return redirect()->intended(route('dashboard'));
     }
 
     /**

@@ -2,10 +2,15 @@
 import { Link } from '@inertiajs/vue3';
 import OrderStatus from '@/Components/OrderStatus.vue';
 import Pagination from '@/Components/Pagination.vue';
+import CustomerLayout from '@/Layouts/CustomerLayout.vue';
+import { ref, computed } from 'vue';
 
-defineProps({
+const props = defineProps({
   orders: Object,
 });
+
+const searchQuery = ref('');
+const statusFilter = ref('all');
 
 const formatDate = (date) => {
   return new Date(date).toLocaleDateString('en-US', {
@@ -16,63 +21,139 @@ const formatDate = (date) => {
     minute: '2-digit',
   });
 };
+
+const filteredOrders = computed(() => {
+  return props.orders.data.filter(order => {
+    const matchesSearch = searchQuery.value === '' ||
+      order.id.toString().includes(searchQuery.value) ||
+      order.branch.name.toLowerCase().includes(searchQuery.value.toLowerCase());
+
+    const matchesStatus = statusFilter.value === 'all' ||
+      order.status.toLowerCase() === statusFilter.value;
+
+    return matchesSearch && matchesStatus;
+  });
+});
 </script>
 
 <template>
-  <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-    <div class="px-4 py-6 sm:px-0">
-      <h1 class="text-2xl font-semibold text-gray-900">My Orders</h1>
-
-      <!-- Orders List -->
-      <div class="mt-6">
-        <div v-if="orders.data.length === 0" class="text-center py-12">
-          <p class="text-gray-500">You haven't placed any orders yet.</p>
-        </div>
-
-        <div v-else class="bg-white shadow overflow-hidden sm:rounded-md">
-          <ul class="divide-y divide-gray-200">
-            <li v-for="order in orders.data" :key="order.id">
-              <Link
-                :href="route('customer.orders.show', order.id)"
-                class="block hover:bg-gray-50"
-              >
-                <div class="px-4 py-4 sm:px-6">
-                  <div class="flex items-center justify-between">
-                    <div class="flex flex-col">
-                      <span class="text-sm font-medium text-indigo-600">
-                        Order #{{ order.id }}
-                      </span>
-                      <span class="text-sm text-gray-500">
-                        {{ formatDate(order.created_at) }}
-                      </span>
-                    </div>
-                    <div class="flex items-center">
-                      <OrderStatus :status="order.status" />
-                      <span class="ml-4 text-sm font-medium text-gray-900">
-                        ${{ Number(order.total_amount).toFixed(2) }}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div class="mt-2">
-                    <div class="text-sm text-gray-500">
-                      {{ order.branch.name }}
-                    </div>
-                    <div class="mt-1 text-sm text-gray-900">
-                      {{ order.items.length }} items <!-- Changed from orderItems to items -->
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        <!-- Pagination -->
-        <div class="mt-6">
-          <Pagination :links="orders.links" />
+  <CustomerLayout>
+    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <!-- Header Section -->
+      <div class="md:flex md:items-center md:justify-between mb-6">
+        <div class="flex-1 min-w-0">
+          <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            My Orders
+          </h1>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            View and track all your orders
+          </p>
         </div>
       </div>
+
+      <!-- Filters Section -->
+      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 mb-6">
+        <div class="sm:flex sm:justify-between sm:items-center">
+          <!-- Search -->
+          <div class="flex-1 min-w-0 max-w-lg">
+            <div class="relative rounded-md shadow-sm">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-search text-gray-400"></i>
+              </div>
+              <input
+                type="text"
+                v-model="searchQuery"
+                class="block w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                placeholder="Search orders..."
+              />
+            </div>
+          </div>
+
+          <!-- Status Filter -->
+          <div class="mt-3 sm:mt-0 sm:ml-4">
+            <select
+              v-model="statusFilter"
+              class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            >
+              <option value="all">All Orders</option>
+              <option value="pending">Pending</option>
+              <option value="processing">Processing</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Orders List -->
+      <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
+        <div v-if="filteredOrders.length === 0" class="text-center py-12">
+          <i class="fas fa-receipt text-4xl text-gray-400 mb-4"></i>
+          <p class="text-gray-500 dark:text-gray-400">No orders found</p>
+        </div>
+
+        <ul v-else class="divide-y divide-gray-200 dark:divide-gray-700">
+          <li v-for="order in filteredOrders" :key="order.id">
+            <Link
+              :href="route('customer.orders.show', order.id)"
+              class="block hover:bg-gray-50 dark:hover:bg-gray-700 transition duration-150"
+            >
+              <div class="px-4 py-4 sm:px-6">
+                <div class="flex items-center justify-between">
+                  <div class="flex flex-col sm:flex-row sm:items-center">
+                    <div class="flex items-center">
+                      <span class="flex-shrink-0 text-lg font-medium text-indigo-600 dark:text-indigo-400">
+                        #{{ order.id }}
+                      </span>
+                      <OrderStatus :status="order.status" class="ml-4" />
+                    </div>
+                    <span class="mt-2 sm:mt-0 sm:ml-6 text-sm text-gray-500 dark:text-gray-400">
+                      {{ formatDate(order.created_at) }}
+                    </span>
+                  </div>
+                  <div class="ml-4 flex items-center">
+                    <span class="text-lg font-medium text-gray-900 dark:text-gray-100">
+                      ${{ Number(order.total_amount).toFixed(2) }}
+                    </span>
+                    <i class="fas fa-chevron-right ml-4 text-gray-400"></i>
+                  </div>
+                </div>
+
+                <div class="mt-4">
+                  <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                    <i class="fas fa-store mr-2"></i>
+                    {{ order.branch.name }}
+                  </div>
+                  <div class="mt-2 flex items-center text-sm">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                          :class="{
+                            'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300': order.payment_status === 'paid',
+                            'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300': order.payment_status === 'pending'
+                          }">
+                      {{ order.payment_status }}
+                    </span>
+                    <span class="mx-2">•</span>
+                    <span>
+                      {{ order.items.length }} {{ order.items.length === 1 ? 'item' : 'items' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Pagination -->
+      <div class="mt-6">
+        <Pagination :links="orders.links" />
+      </div>
     </div>
-  </div>
+  </CustomerLayout>
 </template>
+
+<style scoped>
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+</style>
