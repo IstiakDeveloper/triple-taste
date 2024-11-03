@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminOrderController;
 use App\Http\Controllers\Admin\BranchController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\FoodController;
@@ -23,38 +24,40 @@ Route::get('/welcome', function () {
 
 Route::get('/', function () {
     return Inertia::render('Home');
-});
+})->name('home');
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+
+Route::middleware(['auth', 'not-customer'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
 
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'not-customer'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('categories', CategoryController::class);
     Route::post('categories/update-order', [CategoryController::class, 'updateOrder'])
         ->name('categories.update-order');
-        Route::resource('branches', BranchController::class);
-        Route::resource('foods', FoodController::class);
-
+    Route::resource('branches', BranchController::class);
+    Route::resource('foods', FoodController::class);
+    Route::get('/dashboard', function () {
+        return Inertia::render('Dashboard');
+    })->name('dashboard');
+    Route::get('orders', [AdminOrderController::class, 'index'])->name('orders.index');
+    Route::get('orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
+    Route::patch('orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.update-status');
 });
 
-Route::middleware(['web'])->group(function () {
-    Route::get('/locations', [BranchSelectionController::class, 'index'])
-        ->name('customer.locations');
-
-        Route::get('/branch/{branch}/menu', [FoodMenuController::class, 'index'])
-        ->name('customer.branch.menu');
-});
 
 
 Route::middleware(['auth'])->group(function () {
+
+    Route::get('/locations', [BranchSelectionController::class, 'index'])
+    ->name('customer.locations');
+
+    Route::get('/branch/{branch}/menu', [FoodMenuController::class, 'index'])
+    ->name('customer.branch.menu');
     Route::get('/checkout/{branch}', [CheckoutController::class, 'checkout'])
         ->name('customer.checkout');
     Route::post('/orders', [CheckoutController::class, 'store'])->name('customer.orders.store');

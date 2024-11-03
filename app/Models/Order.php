@@ -73,4 +73,27 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    public static function getStatuses()
+    {
+        return [
+            'pending',
+            'confirmed',
+            'preparing',
+            'ready_for_delivery',
+            'out_for_delivery',
+            'delivered',
+            'cancelled',
+        ];
+    }
+
+    public static function getPaymentStatuses()
+    {
+        return [
+            'pending',
+            'paid',
+            'failed',
+            'refunded',
+        ];
+    }
+
 }

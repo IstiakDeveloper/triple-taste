@@ -270,45 +270,7 @@
             </TransitionRoot>
 
             <!-- Authentication Modal -->
-            <TransitionRoot appear :show="showAuthModal" as="template">
-                <Dialog as="div" @close="closeAuthModal" class="relative z-50">
-                    <!-- Modal Backdrop -->
-                    <div class="fixed inset-0 bg-black bg-opacity-25" />
-
-                    <!-- Modal Content -->
-                    <div class="fixed inset-0 overflow-y-auto">
-                        <div class="flex min-h-full items-center justify-center p-4">
-                            <DialogPanel
-                                class="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 p-6 shadow-xl transition-all">
-                                <DialogTitle as="h3"
-                                    class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100">
-                                    Sign in to Continue
-                                </DialogTitle>
-
-                                <div class="mt-4">
-                                    <p class="text-sm text-gray-600 dark:text-gray-400">
-                                        Please sign in or create an account to place your order.
-                                    </p>
-
-                                    <div class="mt-6 space-y-4">
-                                        <button @click="redirectToLogin"
-                                            class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                            <i class="fas fa-sign-in-alt mr-2"></i>
-                                            Sign In
-                                        </button>
-
-                                        <button @click="redirectToRegister"
-                                            class="w-full inline-flex justify-center items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                            <i class="fas fa-user-plus mr-2"></i>
-                                            Create Account
-                                        </button>
-                                    </div>
-                                </div>
-                            </DialogPanel>
-                        </div>
-                    </div>
-                </Dialog>
-            </TransitionRoot>
+            <AuthModal v-model="showAuthModal" :redirect-path="currentPath" />
 
             <!-- Cart Preview -->
             <Transition enter-active-class="transform transition ease-out duration-300"
@@ -383,6 +345,8 @@ import { Dialog, DialogPanel, DialogTitle, TransitionRoot } from '@headlessui/vu
 import { MinusIcon, PlusIcon } from '@heroicons/vue/24/outline'
 import { router } from '@inertiajs/vue3'
 import CustomerLayout from '@/Layouts/CustomerLayout.vue'
+import AuthModal from '@/Components/Auth/AuthModal.vue'
+
 
 // Props definition
 const props = defineProps({
