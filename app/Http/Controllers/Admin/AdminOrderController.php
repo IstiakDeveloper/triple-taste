@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class AdminOrderController extends Controller
@@ -83,7 +84,7 @@ class AdminOrderController extends Controller
                     'id' => $item->id,
                     'food' => [
                         'name' => $item->food->name,
-                        'image' => $item->food->image_path
+                        'image' => $item->food->image_path ? Storage::url($item->food->image_path) : null
                     ],
                     'quantity' => $item->quantity,
                     'unit_price' => $item->unit_price,

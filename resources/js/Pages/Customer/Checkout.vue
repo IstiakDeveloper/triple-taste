@@ -4,38 +4,38 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <!-- Order Summary -->
           <div class="lg:col-span-2 space-y-6">
-          <div class="bg-gray-800 rounded-lg shadow p-6">
-            <h2 class="text-xl font-semibold text-gray-100 mb-4">Order Summary</h2>
-            <div v-if="cart.length" class="space-y-4">
-              <div v-for="item in cart" :key="item.id"
-                   class="flex justify-between items-start border-b border-gray-700 pb-4">
-                <div>
-                  <h3 class="text-gray-200 font-medium">{{ item.food.name }}</h3>
-                  <p class="text-sm text-gray-400">Quantity: {{ item.quantity }}</p>
-                  <div v-if="item.extras?.length" class="text-sm text-gray-400">
-                    Extras:
-                    <span v-for="(extraId, index) in item.extras" :key="extraId">
-                      {{ item.food.extra_options.find(e => e.id === extraId)?.name }}
-                      <span v-if="index < item.extras.length - 1">, </span>
-                    </span>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Order Summary</h2>
+              <div v-if="cart.length" class="space-y-4">
+                <div v-for="item in cart" :key="item.id"
+                     class="flex justify-between items-start border-b border-gray-200 dark:border-gray-700 pb-4">
+                  <div>
+                    <h3 class="text-gray-900 dark:text-gray-200 font-medium">{{ item.food.name }}</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">Quantity: {{ item.quantity }}</p>
+                    <div v-if="item.extras?.length" class="text-sm text-gray-600 dark:text-gray-400">
+                      Extras:
+                      <span v-for="(extraId, index) in item.extras" :key="extraId">
+                        {{ item.food.extra_options.find(e => e.id === extraId)?.name }}
+                        <span v-if="index < item.extras.length - 1">, </span>
+                      </span>
+                    </div>
+                    <p v-if="item.specialInstructions" class="text-sm text-gray-600 dark:text-gray-400">
+                      Note: {{ item.specialInstructions }}
+                    </p>
                   </div>
-                  <p v-if="item.specialInstructions" class="text-sm text-gray-400">
-                    Note: {{ item.specialInstructions }}
-                  </p>
+                  <span class="text-gray-900 dark:text-gray-200">{{ formatCurrency(item.total) }}</span>
                 </div>
-                <span class="text-gray-200">{{ formatCurrency(item.total) }}</span>
+              </div>
+              <div v-else class="text-gray-600 dark:text-gray-400 text-center py-4">
+                Your cart is empty
               </div>
             </div>
-            <div v-else class="text-gray-400 text-center py-4">
-              Your cart is empty
-            </div>
-          </div>
 
             <!-- Delivery Address -->
-            <div class="bg-gray-800 rounded-lg shadow p-6">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
               <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-semibold text-gray-100">Delivery Address</h2>
-                <button @click="openAddressModal" class="text-indigo-400 hover:text-indigo-300">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100">Delivery Address</h2>
+                <button @click="openAddressModal" class="text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300">
                   + Add New Address
                 </button>
               </div>
@@ -43,18 +43,18 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div v-for="address in addresses" :key="address.id"
                   @click="selectedAddress = address"
-                  class="border rounded-lg p-4 cursor-pointer"
+                  class="border rounded-lg p-4 cursor-pointer transition-colors duration-200"
                   :class="[
                     selectedAddress?.id === address.id
-                      ? 'border-indigo-500 bg-gray-700'
-                      : 'border-gray-700 bg-gray-800 hover:border-gray-600'
+                      ? 'border-orange-500 bg-orange-50 dark:bg-gray-700'
+                      : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'
                   ]"
                 >
                   <div class="flex items-start space-x-3">
                     <MapPinIcon class="w-5 h-5 text-gray-400 flex-shrink-0" />
                     <div>
-                      <p class="text-gray-200 font-medium">{{ address.address_label }}</p>
-                      <p class="text-sm text-gray-400">{{ address.address }}</p>
+                      <p class="text-gray-900 dark:text-gray-200 font-medium">{{ address.address_label }}</p>
+                      <p class="text-sm text-gray-600 dark:text-gray-400">{{ address.address }}</p>
                     </div>
                   </div>
                 </div>
@@ -62,33 +62,33 @@
             </div>
 
             <!-- Payment Method -->
-            <div class="bg-gray-800 rounded-lg shadow p-6">
-              <h2 class="text-xl font-semibold text-gray-100 mb-4">Payment Method</h2>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Payment Method</h2>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <button
                   v-for="method in ['card', 'cash', 'upi', 'wallet']"
                   :key="method"
                   @click="selectedPaymentMethod = method"
-                  class="flex items-center space-x-3 border rounded-lg p-4"
+                  class="flex items-center space-x-3 border rounded-lg p-4 transition-colors duration-200"
                   :class="[
                     selectedPaymentMethod === method
-                      ? 'border-indigo-500 bg-gray-700'
-                      : 'border-gray-700 bg-gray-800 hover:border-gray-600'
+                      ? 'border-orange-500 bg-orange-50 dark:bg-gray-700'
+                      : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'
                   ]"
                 >
                   <CreditCardIcon class="w-5 h-5 text-gray-400" />
-                  <span class="text-gray-200 capitalize">{{ method }}</span>
+                  <span class="text-gray-900 dark:text-gray-200 capitalize">{{ method }}</span>
                 </button>
               </div>
             </div>
 
             <!-- Delivery Notes -->
-            <div class="bg-gray-800 rounded-lg shadow p-6">
-              <h2 class="text-xl font-semibold text-gray-100 mb-4">Delivery Notes</h2>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+              <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Delivery Notes</h2>
               <textarea
                 v-model="deliveryNotes"
                 rows="3"
-                class="w-full bg-gray-700 border-gray-600 rounded-lg text-gray-200 focus:ring-indigo-500 focus:border-indigo-500"
+                class="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 focus:ring-orange-500 focus:border-orange-500"
                 placeholder="Any special instructions for delivery..."
               ></textarea>
             </div>
@@ -96,70 +96,70 @@
 
           <!-- Order Total -->
           <div class="lg:col-span-1">
-          <div class="bg-gray-800 rounded-lg shadow p-6 sticky top-4">
-            <h2 class="text-xl font-semibold text-gray-100 mb-4">Order Total</h2>
-            <div class="space-y-3">
-              <div class="flex justify-between text-gray-300">
-                <span>Subtotal</span>
-                <span>{{ formatCurrency(subtotal) }}</span>
-              </div>
-              <div class="flex justify-between text-gray-300">
-                <span>Delivery Fee</span>
-                <span>{{ formatCurrency(deliveryFee) }}</span>
-              </div>
-              <div class="flex justify-between text-gray-300">
-                <span>Tax (20%)</span>
-                <span>{{ formatCurrency(tax) }}</span>
-              </div>
-              <div class="border-t border-gray-700 pt-3">
-                <div class="flex justify-between text-lg font-semibold text-gray-100">
-                  <span>Total</span>
-                  <span>{{ formatCurrency(total) }}</span>
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 sticky top-4">
+              <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">Order Total</h2>
+              <div class="space-y-3">
+                <div class="flex justify-between text-gray-600 dark:text-gray-300">
+                  <span>Subtotal</span>
+                  <span>{{ formatCurrency(subtotal) }}</span>
+                </div>
+                <div class="flex justify-between text-gray-600 dark:text-gray-300">
+                  <span>Delivery Fee</span>
+                  <span>{{ formatCurrency(deliveryFee) }}</span>
+                </div>
+                <div class="flex justify-between text-gray-600 dark:text-gray-300">
+                  <span>Tax (20%)</span>
+                  <span>{{ formatCurrency(tax) }}</span>
+                </div>
+                <div class="border-t border-gray-200 dark:border-gray-700 pt-3">
+                  <div class="flex justify-between text-lg font-semibold text-gray-900 dark:text-gray-100">
+                    <span>Total</span>
+                    <span>{{ formatCurrency(total) }}</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <button
-              @click="placeOrder"
-              :disabled="isProcessing || !cart.length"
-              class="w-full mt-6 bg-indigo-600 text-white py-3 px-4 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {{ isProcessing ? 'Processing...' : 'Place Order' }}
-            </button>
+              <button
+                @click="placeOrder"
+                :disabled="isProcessing || !cart.length"
+                class="w-full mt-6 bg-orange-600 text-white py-3 px-4 rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              >
+                {{ isProcessing ? 'Processing...' : 'Place Order' }}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
       </div>
 
       <!-- New Address Modal -->
       <TransitionRoot appear :show="isAddressModalOpen" as="template">
         <Dialog as="div" @close="closeAddressModal" class="relative z-50">
-          <div class="fixed inset-0 bg-black bg-opacity-25" />
+          <div class="fixed inset-0 bg-black/50" />
 
           <div class="fixed inset-0 overflow-y-auto">
             <div class="flex min-h-full items-center justify-center p-4">
-              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-lg bg-gray-800 p-6 text-left align-middle shadow-xl transition-all">
-                <DialogTitle as="h3" class="text-lg font-medium text-gray-100">
+              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 p-6 text-left align-middle shadow-xl transition-all">
+                <DialogTitle as="h3" class="text-lg font-medium text-gray-900 dark:text-gray-100">
                   Add New Address
                 </DialogTitle>
 
                 <div class="mt-4 space-y-4">
                   <div>
-                    <label class="block text-sm font-medium text-gray-300">Address Label</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Address Label</label>
                     <input
                       type="text"
                       v-model="newAddress.address_label"
-                      class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-gray-200"
+                      class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
                       placeholder="Home, Work, etc."
                     />
                   </div>
 
                   <div>
-                    <label class="block text-sm font-medium text-gray-300">Full Address</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Full Address</label>
                     <textarea
                       v-model="newAddress.address"
                       rows="3"
-                      class="mt-1 block w-full rounded-md border-gray-600 bg-gray-700 text-gray-200"
+                      class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200"
                     ></textarea>
                   </div>
 
@@ -167,22 +167,22 @@
                     <input
                       type="checkbox"
                       v-model="newAddress.is_default"
-                      class="rounded border-gray-600 bg-gray-700 text-indigo-600"
+                      class="rounded border-gray-300 dark:border-gray-600 text-orange-600 focus:ring-orange-500"
                     />
-                    <label class="ml-2 text-sm text-gray-300">Set as default address</label>
+                    <label class="ml-2 text-sm text-gray-700 dark:text-gray-300">Set as default address</label>
                   </div>
                 </div>
 
                 <div class="mt-6 flex justify-end space-x-3">
                   <button
                     @click="closeAddressModal"
-                    class="px-4 py-2 text-sm text-gray-300 hover:text-gray-100"
+                    class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
                   >
                     Cancel
                   </button>
                   <button
                     @click="saveAddress"
-                    class="px-4 py-2 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                    class="px-4 py-2 text-sm bg-orange-600 text-white rounded-md hover:bg-orange-700 transition-colors duration-200"
                   >
                     Save Address
                   </button>

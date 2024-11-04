@@ -50,14 +50,13 @@ Route::middleware(['auth', 'not-customer'])->prefix('admin')->name('admin.')->gr
 });
 
 
+Route::get('/locations', [BranchSelectionController::class, 'index'])
+->name('customer.locations');
+Route::get('/branch/{branch}/menu', [FoodMenuController::class, 'index'])
+->name('customer.branch.menu');
 
 Route::middleware(['auth'])->group(function () {
 
-    Route::get('/locations', [BranchSelectionController::class, 'index'])
-    ->name('customer.locations');
-
-    Route::get('/branch/{branch}/menu', [FoodMenuController::class, 'index'])
-    ->name('customer.branch.menu');
     Route::get('/checkout/{branch}', [CheckoutController::class, 'checkout'])
         ->name('customer.checkout');
     Route::post('/orders', [CheckoutController::class, 'store'])->name('customer.orders.store');

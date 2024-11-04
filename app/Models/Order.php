@@ -95,5 +95,76 @@ class Order extends Model
             'refunded',
         ];
     }
+    // In Order.php
+    public function getStatusTimeline()
+    {
+        $allStatuses = [
+            'pending' => [
+                'label' => 'Order Placed',
+                'icon' => 'fa-shopping-cart'
+            ],
+            'confirmed' => [
+                'label' => 'Order Confirmed',
+                'icon' => 'fa-check-circle'
+            ],
+            'preparing' => [
+                'label' => 'Preparing',
+                'icon' => 'fa-utensils'
+            ],
+            'ready_for_delivery' => [
+                'label' => 'Ready for Delivery',
+                'icon' => 'fa-box'
+            ],
+            'out_for_delivery' => [
+                'label' => 'Out for Delivery',
+                'icon' => 'fa-truck'
+            ],
+            'delivered' => [
+                'label' => 'Delivered',
+                'icon' => 'fa-check-double'
+            ]
+        ];
+
+        $currentStatusFound = false;
+        $timeline = [];
+
+        foreach ($allStatuses as $statusKey => $statusData) {
+            // Skip if order is cancelled and we haven't reached the status when it was cancelled
+            if ($this->status === 'cancelled' && !$currentStatusFound) {
+                continue;
+            }
+
+            $isCompleted = false;
+
+            // If this status is the current one or has been passed
+            if ($this->status === $statusKey) {
+                $currentStatusFound = true;
+                $isCompleted = true;
+            } elseif (!$currentStatusFound) {
+                $isCompleted = true;
+            }
+
+            $timeline[] = [
+                'status' => $statusKey,
+                'label' => $statusData['label'],
+                'icon' => $statusData['icon'],
+                'timestamp' => $this->created_at, // Since you don't have individual timestamps
+                'completed' => $isCompleted
+            ];
+        }
+
+        // Add cancelled status if order is cancelled
+        if ($this->status === 'cancelled') {
+            $timeline = [[
+                'status' => 'cancelled',
+                'label' => 'Order Cancelled',
+                'icon' => 'fa-times-circle',
+                'timestamp' => $this->updated_at,
+                'completed' => true
+            ]];
+        }
+
+        return $timeline;
+    }
 
 }
