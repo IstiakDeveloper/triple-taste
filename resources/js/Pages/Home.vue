@@ -279,25 +279,25 @@ const categories = [
   {
     id: 1,
     name: 'Pizza',
-    image: '/icons/pizza.svg',
+    image: '/icons/pizza.png',
     delay: 0,
   },
   {
     id: 2,
     name: 'Burgers',
-    image: '/icons/burger.svg',
+    image: '/icons/burger.png',
     delay: 50,
   },
   {
     id: 3,
     name: 'Sushi',
-    image: '/icons/sushi.svg',
+    image: '/icons/sushi.png',
     delay: 100,
   },
   {
     id: 4,
     name: 'Italian',
-    image: '/icons/pasta.svg',
+    image: '/icons/pasta.png',
 },
 
 
@@ -305,13 +305,13 @@ const categories = [
 {
     id: 5,
     name: 'Chinese',
-    image: '/icons/chinese.svg',
+    image: '/icons/chinese.png',
     delay: 150,
   },
   {
     id: 6,
     name: 'Indian',
-    image: '/icons/indian.svg',
+    image: '/icons/indian.png',
     delay: 200,
   }
 ];
